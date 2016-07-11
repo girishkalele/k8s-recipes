@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udpclient
+  labels:
+    app: loggerclient
+spec:
+  restartPolicy: Always
+  containers:
+  - name: udpclient
+    imagePullPolicy: Always
+    image: "girishkalele/udpclient:1.0"
+

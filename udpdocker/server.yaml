@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udpserver
+  labels:
+    app: logger
+spec:
+  restartPolicy: Always
+  containers:
+  - name: udpserver
+    image: "girishkalele/udpserver:1.0"
+    imagePullPolicy: Always
+    ports:
+        - name: logger
+          protocol: UDP
+          containerPort: 10001
+
