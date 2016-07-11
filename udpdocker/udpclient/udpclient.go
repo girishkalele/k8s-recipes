@@ -15,36 +15,39 @@ limitations under the License.
 */
 
 package main
- 
+
 import (
-    "fmt"
-    "net"
-    "time"
-    "strconv"
-    "log"
+	"fmt"
+	"log"
+	"net"
+	"strconv"
+	"time"
 )
 
 func main() {
-    addr,err := net.ResolveUDPAddr("udp","logger:10001")
-    if err != nil {
-        log.Fatalf("Failed to lookup server hostname : logger %s", err)
-    }
-    laddr, _ := net.ResolveUDPAddr("udp", "0.0.0.0:0")
-    conn, err := net.DialUDP("udp", laddr, addr)
-    if err != nil {
-        log.Fatalf("Failed to setup udp connection (%s)", err)
-    }
-    defer conn.Close()
-    i := 0
-    for {
-        msg := strconv.Itoa(i)
-        i++
-        buf := []byte(msg)
-	fmt.Printf("Sending udp packet %d\n", i)
-        _,err := conn.Write(buf)
-        if err != nil {
-            fmt.Println(msg, err)
-        }
-        time.Sleep(time.Millisecond * 100)
-    }
+
+	time.Sleep(time.Second * 3)
+
+	addr, err := net.ResolveUDPAddr("udp", "logger:10001")
+	if err != nil {
+		log.Fatalf("Failed to lookup server hostname : logger %s", err)
+	}
+	laddr, _ := net.ResolveUDPAddr("udp", "0.0.0.0:0")
+	conn, err := net.DialUDP("udp", laddr, addr)
+	if err != nil {
+		log.Fatalf("Failed to setup udp connection (%s)", err)
+	}
+	defer conn.Close()
+	i := 0
+	for {
+		msg := strconv.Itoa(i)
+		i++
+		buf := []byte(msg)
+		fmt.Printf("Sending udp packet %d\n", i)
+		_, err := conn.Write(buf)
+		if err != nil {
+			fmt.Println(msg, err)
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
 }

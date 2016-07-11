@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from girishkalele/udpserver:1.0
+from girishkalele/jessie-full:1.0
 
-RUN rm -rf /go/src/udpclient
-RUN mkdir -p /go/src/udpclient
+RUN rm -rf /go/src/udpclient; mkdir -p /go/src/udpclient
 COPY udpclient.go /go/src/udpclient
 
-RUN find / -name go -type f
-RUN PATH=$PATH:/usr/lib/go-1.6/bin go version
-RUN GOPATH=/go CGO_ENABLED=0 PATH=$PATH:/usr/lib/go-1.6/bin go build -o /go/src/udpclient/udpclient /go/src/udpclient/udpclient.go 
-RUN /usr/bin/file /go/src/udpclient/udpclient
-RUN ls -lh /go/src/udpclient/udpclient
+RUN GOPATH=/go CGO_ENABLED=0 PATH=$PATH:/usr/lib/go-1.6/bin go build -o /go/src/udpclient/udpclient /go/src/udpclient/udpclient.go ; /usr/bin/file /go/src/udpclient/udpclient; ls -lh /go/src/udpclient/udpclient
 
 ENTRYPOINT [ "/go/src/udpclient/udpclient" ]

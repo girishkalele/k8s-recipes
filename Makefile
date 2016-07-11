@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from girishkalele/jessie-full:1.0
+# Top-level makefile to recursively build everything in this repository
+all: build
 
-RUN rm -rf /go/src/udpserver
-RUN mkdir -p /go/src/udpserver
-COPY udpserver.go /go/src/udpserver
+build:
+	for i in `find . -mindepth 2 -name Makefile`; do pushd `dirname $$i`; make build; popd; done
 
-RUN find / -name go -type f
-RUN PATH=$PATH:/usr/lib/go-1.6/bin go version
-RUN GOPATH=/go CGO_ENABLED=0 PATH=$PATH:/usr/lib/go-1.6/bin go build -o /go/src/udpserver/udpserver /go/src/udpserver/udpserver.go 
-RUN /usr/bin/file /go/src/udpserver/udpserver
-RUN ls -lh /go/src/udpserver/udpserver
+run: build
+	docker run $(IMAGE)
 
-ENTRYPOINT [ "/go/src/udpserver/udpserver" ]
+push: build
+	for i in `find . -mindepth 2 -name Makefile`; do pushd `dirname $$i`; make push; popd; done
+

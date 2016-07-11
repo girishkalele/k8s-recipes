@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from girishkalele/jessie-full:1.0
+from debian:jessie
 
-RUN rm -rf /go/src/udpserver
-RUN mkdir -p /go/src/udpserver
-COPY udpserver.go /go/src/udpserver
+RUN apt-get update
+RUN apt-get install -y file wget curl tcpdump vim net-tools bridge-utils iptables ebtables dnsutils nmap
+RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-go_1.6-0ubuntu1~14.04_amd64.deb
+RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-src_1.6-0ubuntu1~14.04_amd64.deb
+RUN dpkg -i golang-1.6-*.deb
 
-RUN find / -name go -type f
-RUN PATH=$PATH:/usr/lib/go-1.6/bin go version
-RUN GOPATH=/go CGO_ENABLED=0 PATH=$PATH:/usr/lib/go-1.6/bin go build -o /go/src/udpserver/udpserver /go/src/udpserver/udpserver.go 
-RUN /usr/bin/file /go/src/udpserver/udpserver
-RUN ls -lh /go/src/udpserver/udpserver
+RUN echo "PATH=$PATH:/usr/lib/go-1.6/bin" >> /env.sh
 
-ENTRYPOINT [ "/go/src/udpserver/udpserver" ]
+ENTRYPOINT [ "/bin/bash" ]
