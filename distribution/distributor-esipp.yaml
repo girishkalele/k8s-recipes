@@ -1,0 +1,60 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+      # WARNING: This annotation changes default behaviour
+      service.alpha.kubernetes.io/only-node-local-endpoints: "true"
+  labels:
+    component: apiserver
+    provider: kubernetes
+  name: distributor
+  namespace: default
+spec:
+  ports:
+  - name: distributor
+    port: 10001
+    protocol: UDP
+    targetPort: 10001
+  type: LoadBalancer
+  selector:
+    app: distributor
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: distributionserver
+  labels:
+    app: distributor
+spec:
+  replicas: 5
+  template:
+    metadata:
+      name: distributionserver
+      labels:
+        app: distributor
+    spec:
+      containers:
+        - name: distributionserver
+          image: "girishkalele/distribution-udpserver:1.0"
+          imagePullPolicy: Always
+          ports:
+            - name: distributor
+              protocol: UDP
+              containerPort: 10001
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP

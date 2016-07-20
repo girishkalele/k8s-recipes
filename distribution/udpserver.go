@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// A UDP server to test bounce-backs from pods behind a LoadBalancer service.
+
+// Methodology:
+//  Respond to UDP pings with our pod name that was exposed via the Downward API as an environment variable.
+//  The client will aggregate results and measure the distribution over all the backend pods.
+
 package main
 
 import (
@@ -22,6 +28,10 @@ import (
 	"net"
 	"os"
 )
+
+func readPodNameFromDownwardAPI() string {
+	return fmt.Sprintf("%s/%s/%s", os.Getenv("MY_POD_NAMESPACE"), os.Getenv("MY_POD_IP"), os.Getenv("MY_POD_NAME"))
+}
 
 func main() {
 	addr, err := net.ResolveUDPAddr("udp", ":10001")
@@ -36,13 +46,13 @@ func main() {
 	defer conn.Close()
 
 	buf := make([]byte, 8192)
-	hostname, _ := os.Hostname()
+	hostname := readPodNameFromDownwardAPI()
 	hostnameBuf := make([]byte, len(hostname)+1)
 	copy(hostnameBuf[:], hostname)
 	fmt.Println("Waiting for UDP packets")
 	for {
-		n, addr, err := conn.ReadFromUDP(buf)
-		fmt.Println("Received ", string(buf[0:n]), " from ", addr)
+		_, addr, err := conn.ReadFromUDP(buf)
+		//fmt.Println("Received ", string(buf[0:n]), " from ", addr)
 
 		if err != nil {
 			fmt.Println("Error: ", err)

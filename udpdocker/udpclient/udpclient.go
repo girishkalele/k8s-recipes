@@ -39,6 +39,7 @@ func main() {
 	}
 	defer conn.Close()
 	i := 0
+	recvBuffer := make([]byte, 8192)
 	for {
 		msg := strconv.Itoa(i)
 		i++
@@ -49,5 +50,8 @@ func main() {
 			fmt.Println(msg, err)
 		}
 		time.Sleep(time.Millisecond * 100)
+		fmt.Printf("Waiting for a response")
+		n, _, _ := conn.ReadFromUDP(recvBuffer)
+		fmt.Printf("%s responded\n", string(recvBuffer[0:n-1]))
 	}
 }
