@@ -16,8 +16,10 @@ from debian:jessie
 
 RUN apt-get update
 RUN apt-get install -y file wget curl tcpdump vim net-tools bridge-utils iptables ebtables dnsutils nmap
-RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-go_1.6-0ubuntu1~14.04_amd64.deb
-RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-src_1.6-0ubuntu1~14.04_amd64.deb
+#RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-go_1.6-0ubuntu1~14.04_amd64.deb
+RUN wget https://storage.googleapis.com/k8s-bandwidth-test/golang-1.6-go_1.6-0ubuntu1~14.04_amd64.deb
+#RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-1.6/golang-1.6-src_1.6-0ubuntu1~14.04_amd64.deb
+RUN wget https://storage.googleapis.com/k8s-bandwidth-test/golang-1.6-src_1.6-0ubuntu1~14.04_amd64.deb
 RUN dpkg -i golang-1.6-*.deb
 
 RUN echo "PATH=$PATH:/usr/lib/go-1.6/bin" >> /env.sh
