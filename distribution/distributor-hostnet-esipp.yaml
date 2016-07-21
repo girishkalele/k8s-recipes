@@ -37,6 +37,7 @@ spec:
       labels:
         app: distributor
     spec:
+      hostNetwork: true
       containers:
         - name: distributionserver
           image: "girishkalele/distribution-udpserver:1.0"

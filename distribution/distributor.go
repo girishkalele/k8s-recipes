@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -44,13 +45,17 @@ func printDistribution(dmap map[string]int) {
 		time.Sleep(time.Second * 5)
 		var total float64
 		lock.Lock()
-		for _, n := range dmap {
-			total = total + float64(n)
-		}
+		keys := []string{}
 		for k, n := range dmap {
+			total = total + float64(n)
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			n := dmap[k]
 			var nf float64 = float64(n)
 			fmt.Printf("%s : %3.2f%% (%d/%d)\n", k, float64(nf*100.0)/total, n, int(total))
-			dmap[k] = 0 // clear on read
+			delete(dmap, k) // clear on read
 		}
 		lock.Unlock()
 		fmt.Printf("------------------------\n")
@@ -96,16 +101,24 @@ func main() {
 				if err != nil {
 					fmt.Println(msg, err)
 				}
-				time.Sleep(time.Millisecond * 1)
+				time.Sleep(time.Millisecond * 10)
 				//fmt.Printf("Waiting for a response")
-				n, _, _ := conn.ReadFromUDP(recvBuffer)
-				if n > 0 {
+				conn.SetReadDeadline(time.Now().Add(time.Millisecond * 200)) // us-east should be around 40 ms away
+				n, _, err := conn.ReadFromUDP(recvBuffer)
+				if n > 0 && err == nil {
 					podname := string(recvBuffer[0 : n-1])
 					lock.Lock()
 					count := dmap[podname]
 					dmap[podname] = count + 1
 					lock.Unlock()
 					//fmt.Printf("%s responded\n", podname)
+				} else if err != nil {
+					if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
+						// time outs are ok, add to the "timeout" phantom pod
+						lock.Lock()
+						dmap["timeout"] = 1 + dmap["timeout"]
+						lock.Unlock()
+					}
 				}
 				conn.Close()
 			}
